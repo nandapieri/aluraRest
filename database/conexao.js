@@ -6,7 +6,7 @@ const conexao = mysql.createConnection({
   user: process.env.DB_USER,
   port: 3306,
   password: process.env.DB_PASS,
-  database: 'agenda-petshop'
+  database: 'agenda-petshop2'
 });
 
 module.exports = conexao;
