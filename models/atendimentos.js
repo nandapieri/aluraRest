@@ -65,6 +65,12 @@ class Atendimento {
 
   altera(id, valores, res) {
     const sql = 'UPDATE Atendimentos SET ? WHERE id=?';
+
+    //verificar formato de data para o banco  
+    if (valores.data) {
+      valores.data = moment(valores.data, 'DD/MM/YYYY').format('YYYY-MM-DD HH:mm:ss');
+    }
+
     conexao.query(sql, [valores, id], (error, result) => {
       if (error) {
         res.status(400).json(error);
