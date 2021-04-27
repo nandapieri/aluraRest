@@ -39,6 +39,40 @@ class Atendimento {
       });
     }
   }
+
+  lista(res) {
+    const sql = 'SELECT * FROM Atendimentos';
+
+    conexao.query(sql, (error, result) => {
+      if (error) {
+        res.status(400).json(error);
+      } else {
+          res.status(200).json(result);
+      }
+    });
+  }
+
+  buscaPorId(id, res) {
+    const sql = 'SELECT * FROM Atendimentos WHERE id='+id;
+    conexao.query(sql, (error, result) => {
+      if (error) {
+        res.status(400).json(error);
+      } else {
+          res.status(200).json(result[0]);
+      }
+    });
+  }
+
+  altera(id, valores, res) {
+    const sql = 'UPDATE Atendimentos SET ? WHERE id=?';
+    conexao.query(sql, [valores, id], (error, result) => {
+      if (error) {
+        res.status(400).json(error);
+      } else {
+          res.status(200).json(result);
+      }
+    });
+  }
 }
 
 module.exports = new Atendimento;
