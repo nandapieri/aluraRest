@@ -66,7 +66,7 @@ class Atendimento {
   altera(id, valores, res) {
     const sql = 'UPDATE Atendimentos SET ? WHERE id=?';
 
-    //verificar formato de data para o banco  
+    //verificar formato de data para o banco
     if (valores.data) {
       valores.data = moment(valores.data, 'DD/MM/YYYY').format('YYYY-MM-DD HH:mm:ss');
     }
@@ -76,6 +76,17 @@ class Atendimento {
         res.status(400).json(error);
       } else {
           res.status(200).json(result);
+      }
+    });
+  }
+
+  deleta(id, res) {
+    const sql = 'DELETE FROM Atendimentos WHERE id=?';
+    conexao.query(sql, id, (error, result) => {
+      if (error) {
+        res.status(400).json(error);
+      } else {
+          res.status(200).json({id});
       }
     });
   }
