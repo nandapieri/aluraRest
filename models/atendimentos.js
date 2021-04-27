@@ -34,7 +34,7 @@ class Atendimento {
         if(error) {
           res.status(400).json(error);
         } else {
-          res.status(201).json(result);
+          res.status(201).json({atendimento});
         }
       });
     }
@@ -75,7 +75,7 @@ class Atendimento {
       if (error) {
         res.status(400).json(error);
       } else {
-          res.status(200).json(result);
+          res.status(200).json({...valores, id});
       }
     });
   }
