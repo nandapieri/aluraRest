@@ -1,43 +1,58 @@
 const conexao = require('../database/conexao');
 const moment = require('moment');
 const axios = require('axios');
+const repositorio = require('../repositorios/atendimentos');
 
 class Atendimento {
-  adiciona (atendimento, res) {
-    const sql = 'INSERT INTO Atendimentos SET ?';
-    const dataCriacao = new Date();
-    const data = moment(atendimento.data, 'DD/MM/YYYY').format('YYYY-MM-DD HH:mm:ss');
+  constructor() {
 
-    const dataValida = moment(data).isSameOrAfter(dataCriacao);
-    const clienteValido = atendimento.cliente.length >= 5;
+    this.dataValida = ({data, dataCriacao}) => moment(data).isSameOrAfter(dataCriacao);
+    this.clienteValido = ({tamanho}) => tamanho >= 5;
 
-    const validacoes = [
+    this.validacoes = [
       {
         nome: "data",
-        valido: dataValida,
+        valido: this.dataValida,
         mensagem: "Data inválida - a data deve ser maior ou igual a data atual."
       },
       {
         nome: "cliente",
-        valido: clienteValido,
+        valido: this.clienteValido,
         mensagem: "Cliente inválido - O nome do cliente deve ter pelo menos 5 caracteres."
       }
     ];
 
-    const buscaErros = validacoes.filter(campo => !campo.valido);
+    this.validaDados = (params) => this.validacoes.filter(campo => {
+      const { nome } = campo;
+      const parametro = params[nome];
+      return !campo.valido(parametro);
+    })
+  }
+
+  adiciona (atendimento) {
+
+    const dataCriacao = new Date();
+    const data = moment(atendimento.data, 'DD/MM/YYYY').format('YYYY-MM-DD HH:mm:ss');
+
+    const params = {
+      data: { data, dataCriacao },
+      cliente: { tamanho: atendimento.cliente.length }
+    }
+    const buscaErros = this.validaDados(params);
     const erros = buscaErros.length > 0;
 
     if (erros) {
-      res.status(400).json(buscaErros);
+      return new Promise((resolve, reject) => {
+        reject(erros);
+      });
+
     } else {
       const atendimentoDatado = {...atendimento, dataCriacao, data};
-      conexao.query(sql, atendimentoDatado, (error, result) => {
-        if(error) {
-          res.status(400).json(error);
-        } else {
-          res.status(201).json({atendimento});
-        }
-      });
+      return repositorio.adiciona(atendimentoDatado)
+        .then((resultados) => {
+          const id = resultados.insertId;
+          return { ...atendimento, id }
+        });
     }
   }
 
