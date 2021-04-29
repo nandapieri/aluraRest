@@ -56,60 +56,38 @@ class Atendimento {
     }
   }
 
-  lista(res) {
-    const sql = 'SELECT * FROM Atendimentos';
-
-    conexao.query(sql, (error, result) => {
-      if (error) {
-        res.status(400).json(error);
-      } else {
-          res.status(200).json(result);
-      }
-    });
+  lista() {
+    return repositorio.lista();
   }
 
-  buscaPorId(id, res) {
-    const sql = 'SELECT * FROM Atendimentos WHERE id='+id;
-    conexao.query(sql, async (error, result) => {
-      const atendimento = result[0];
-      const cpf = atendimento.cliente;
-      if (error) {
-        res.status(400).json(error);
-      } else {
-        //buscar informações do cliente no servico de clientes por cpf e colocar dados no obj atendimento
+  buscaPorId(id) {
+
+    //return repositorio.buscaPorId(id);
+    return repositorio.buscaPorId(id)
+      .then( async (resultados) => {
+        const atendimento = resultados[0];
+        const cpf = atendimento.cliente;
         const { data } = await axios.get('http://localhost:8082/'+cpf);
         atendimento.cliente = data;
-        res.status(200).json(atendimento);
-      }
-    });
+        return { atendimento }
+      })
+      .catch((error) => {
+        return {error}
+      })
   }
 
-  altera(id, valores, res) {
-    const sql = 'UPDATE Atendimentos SET ? WHERE id=?';
+  altera(id, valores) {
 
-    //verificar formato de data para o banco
+    //ajusta formato de data para o banco se houver
     if (valores.data) {
       valores.data = moment(valores.data, 'DD/MM/YYYY').format('YYYY-MM-DD HH:mm:ss');
     }
 
-    conexao.query(sql, [valores, id], (error, result) => {
-      if (error) {
-        res.status(400).json(error);
-      } else {
-          res.status(200).json({...valores, id});
-      }
-    });
+    return repositorio.altera(id, valores);
   }
 
-  deleta(id, res) {
-    const sql = 'DELETE FROM Atendimentos WHERE id=?';
-    conexao.query(sql, id, (error, result) => {
-      if (error) {
-        res.status(400).json(error);
-      } else {
-          res.status(200).json({id});
-      }
-    });
+  deleta(id) {
+    return repositorio.deleta(id);
   }
 }
 
